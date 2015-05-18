@@ -5,7 +5,7 @@
 
 
 void cosseno(int numThreads);
-void calculaTermo();
+void *calculaTermo();
 
 pthread_t *threads;
 
@@ -40,8 +40,10 @@ void cosseno(int numThreads)
 }
 
 
-void calculaTermo(void *i)
+void *calculaTermo(void *i)
 {
 	int num = *((int *) i);
 	printf("%d\n", num);
+
+	return NULL;
 }
