@@ -7,15 +7,17 @@
 #include <unistd.h>
 #include <gmpxx.h>
 #include <vector>
-#include "mathFunctions.h"
+#include "mathFunctions.hpp"
+#include <stdlib.h>
+#include <stdio.h>
 
 #define SHARED 1
 
 using namespace std;
 
-void cosseno(int numThreads);
+void cosseno();
 void *calculaTermo(void*);
-int modulo(int i);
+float modulo(float i);
 int diferencaMenorQueM(int thread1);
 
 vector<pthread_t> threads;
@@ -25,14 +27,12 @@ sem_t mutexSoma;
 
 unsigned int numCores = 0;
 
-int *termo;
+vector<float> termo;
 
 int numThreads;
-int somaTermos;
-int valorUltimaThread;
-int valorPenultimaThread;
+float somaTermos;
 int x; /*GMP*/
-int parada; /*GMP*/
+float parada; /*GMP*/
 char opcao;
 
 int parar;
@@ -50,48 +50,63 @@ int main (int argc, char *argv[]){
   mpf_init_set_si(base,40320);
   mpf_pow_ui(resp,base,40320);
   cout << resp << endl;
-  x = 0.0254;  
-  numThreads = 10;
-  opcao = 'f';
+
+  /*---------*/
+  x = 5;  
+  numThreads = 3;
+  opcao = 'm';
+  parada = 0.001;
+  /*--------*/
+
+  cosseno();
   return 0;
 }
 
-void cosseno(int numThreads){
+
+
+void cosseno(){
   int i;
   vector<int> thread_args;
-
+  parar = 0;
   threads.resize(numThreads);
+  termo.resize(numThreads);
   thread_args.resize(numThreads);
 
   pthread_barrier_init(&barreira,NULL,numThreads);
   
   sem_init(&mutexSoma , SHARED, 1);
 
-  for(i=0; i<numThreads; i++) thread_args[i] = i;
-
+  for(i=0; i<numThreads; i++) 
+  {
+    thread_args[i] = i;
+    termo[i] = 5;
+  }
+  
   for(i = 0; i < numThreads; i++)
     if(pthread_create(&threads[i], NULL, calculaTermo,(void*)&thread_args[i]))
       abort();
-  
+
   for (i = 0; i < numThreads; i++) pthread_join(threads[i], NULL);
+
+  printf("\n\n %f\n", somaTermos);
 }
 
 
-void *calculaTermo(void *i){
+
+void *calculaTermo(void *i)
+{
   int num = *((int *) i);
   int rodada = 0, n;
 
-<<<<<<< HEAD
   while(!parar)
   {
-=======
-  while(1){
-    
->>>>>>> 0098906662724f50ddad30d8afdf8a2d42a2e323
+    printf("%d\n", num);
     n = rodada*numThreads + num;
 
 
-    termo[num] = 1.0*menosUmElevadoAn(n)*potencia(x, 2*n) /fatorial(2*n);
+    termo[num] = menosUmElevadoAnINT(n)*potenciaINT(x, 2*n)*1.0 /fatorialINT(2*n);
+    printf("n:%d  x:%d  -1:%d   poten:%d    fato:%d\n",n, x, menosUmElevadoAnINT(n), potenciaINT(x, 2*n), fatorialINT(2*n) );
+    printf("%f\n\n\n", termo[num]);
 
     if(opcao == 'f' && diferencaMenorQueM(num))
     {
@@ -99,58 +114,30 @@ void *calculaTermo(void *i){
     }
     if(opcao == 'm' && modulo(termo[num])< parada)
     {
+      printf("CAIUUUU %f\n   %f - %f", termo[num], modulo(termo[num]), parada);
       parar = 1;
     }
 
     pthread_barrier_wait(&barreira);
 
-    if(num == numThreads-2) valorPenultimaThread = termo[num];
-    else if (num == numThreads-1) valorUltimaThread = termo[num];
-
-<<<<<<< HEAD
     sem_wait(&mutexSoma);
       somaTermos += termo[num];
     sem_post(&mutexSoma);
-=======
-    sem_wait(mutexSoma);
-    somaTermos += termo[num];
-    sem_post(mutexSoma);
-  
-    sem_wait(&mutexQuantosPassaram);
-      quantosPassaram++;
- 
-      if(quantosPassaram == numThreads)
-      {
-        /* condição de parada: */
-        if(opcao == 'f' && valorUltimaThread-valorUltimaThread < parada)
-        {
-          sem_wait(parar);
-        }
-        if(opcao == 'm' && valorUltimaThread < parada)
-        {
-          sem_wait(parar);
-        }
 
-        quantosPassaram = 0;
-      }
-    sem_post(&mutexQuantosPassaram);
-    /* pthread_barrier_wait(&barreira); */
+    rodada++;
 
->>>>>>> 0098906662724f50ddad30d8afdf8a2d42a2e323
   }
   return NULL;
 }
 
 
 
-int modulo(int i)
+float modulo(float i)
 {
   if (i>=0)
     return i;
   return -1*i;
 }
-<<<<<<< HEAD
-
 
 int diferencaMenorQueM(int thread1)
 {
@@ -176,5 +163,3 @@ int diferencaMenorQueM(int thread1)
   }
   return 0;
 }
-=======
->>>>>>> 0098906662724f50ddad30d8afdf8a2d42a2e323
