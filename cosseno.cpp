@@ -8,6 +8,8 @@
 #include <gmpxx.h>
 #include <vector>
 
+#include "mathFunctions.hpp"
+
 using namespace std;
 
 void cosseno(int numThreads);
@@ -22,7 +24,7 @@ int parar;
 
 int main (int argc, char *argv[])
 {
-  numCores = std::thread::hardware_concurrency();
+  numCores = thread::hardware_concurrency();
   printf("numCores = %d\n",numCores);
 
   numThreads = 10;
