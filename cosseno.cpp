@@ -51,13 +51,21 @@ void cosseno(int numThreads)
 void *calculaTermo(void *i)
 {
   int num = *((int *) i);
-  int rodada = 0, iteracao;
+  int rodada = 0, n;
+  int termo;
+
   while(1)
   {
-    iteracao = rodada*numThreads + num;
+    n = rodada*numThreads + num;
     printf("%d\n", iteracao);
+
+
+    termo[num] = 1.0*menosUmElevadoAn(x)*potencia(x, 2*n) /fatorial(2*n);
+    pthread_barrier_wait(&barreira);
+    
+    
+    pthread_barrier_wait(&barreira);
 
   }
   return NULL;
 }
-
