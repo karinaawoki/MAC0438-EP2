@@ -14,11 +14,17 @@ void cosseno(int numThreads);
 void *calculaTermo(void*);
 
 vector<pthread_t> threads;
+pthread_barrier_t barreira; 
 
 unsigned int numCores = 0;
 
+
 int numThreads;
 int parar;
+int somaTermos;
+int quantosPassaram;
+int valorUltimaThread;
+int valorPenultimaThread;
 
 int main (int argc, char *argv[])
 {
@@ -36,6 +42,8 @@ void cosseno(int numThreads)
 
   threads.resize(numThreads);
   thread_args.resize(numThreads);
+
+  quantosPassaram = 0;
   
 
   for(i=0; i<numThreads; i++) thread_args[i] = i;
@@ -57,14 +65,30 @@ void *calculaTermo(void *i)
   while(1)
   {
     n = rodada*numThreads + num;
-    printf("%d\n", iteracao);
 
 
     termo[num] = 1.0*menosUmElevadoAn(x)*potencia(x, 2*n) /fatorial(2*n);
     pthread_barrier_wait(&barreira);
-    
-    
-    pthread_barrier_wait(&barreira);
+
+    if(num == numThreads-2) valorPenultimaThread = termo[num];
+    else if (num == numThreads-1) valorUltimaThread = termo[num];
+    sem_wait(mutexSoma);
+      somaTermos += termo[num];
+    sem_post(mutexSoma);
+  
+    sem_wait(&mutexQuantosPassaram);
+      quantosPassaram++;
+    sem_post(&mutexQuantosPassaram);
+ 
+      if(quantosPassaram == numThreads)
+      {
+        /* condição de parada: */
+        if(opcao == 'f' && )
+
+        quantosPassaram = 0;
+      }
+
+    /* pthread_barrier_wait(&barreira); */
 
   }
   return NULL;
