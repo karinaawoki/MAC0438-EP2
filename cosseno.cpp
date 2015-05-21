@@ -28,8 +28,7 @@ int quantosPassaram;
 int valorUltimaThread;
 int valorPenultimaThread;
 
-int main (int argc, char *argv[])
-{
+int main (int argc, char *argv[]){
   numCores = thread::hardware_concurrency();
   printf("numCores = %d\n",numCores);
 
@@ -45,8 +44,7 @@ int main (int argc, char *argv[])
   return 0;
 }
 
-void cosseno(int numThreads)
-{
+void cosseno(int numThreads){
   int i;
   vector<int> thread_args;
 
@@ -66,14 +64,13 @@ void cosseno(int numThreads)
 }
 
 
-void *calculaTermo(void *i)
-{
+void *calculaTermo(void *i){
   int num = *((int *) i);
   int rodada = 0, n;
   int termo;
 
-  while(1)
-  {
+  while(1){
+    
     n = rodada*numThreads + num;
 
 
@@ -83,20 +80,18 @@ void *calculaTermo(void *i)
     if(num == numThreads-2) valorPenultimaThread = termo[num];
     else if (num == numThreads-1) valorUltimaThread = termo[num];
     sem_wait(mutexSoma);
-      somaTermos += termo[num];
+    somaTermos += termo[num];
     sem_post(mutexSoma);
   
     sem_wait(&mutexQuantosPassaram);
-      quantosPassaram++;
+    quantosPassaram++;
     sem_post(&mutexQuantosPassaram);
  
-      if(quantosPassaram == numThreads)
-      {
-        /* condição de parada: */
-        if(opcao == 'f' && )
-
-        quantosPassaram = 0;
-      }
+    if(quantosPassaram == numThreads){
+      /* condição de parada: */
+      if(opcao == 'f' && )
+	quantosPassaram = 0;
+    }
 
     /* pthread_barrier_wait(&barreira); */
 
