@@ -17,13 +17,17 @@ vector<pthread_t> threads;
 
 unsigned int numCores = 0;
 
+int numThreads;
+int parar;
+
 int main (int argc, char *argv[])
 {
   numCores = std::thread::hardware_concurrency();
   printf("numCores = %d\n",numCores);
+
+  numThreads = 10;
   return 0;
 }
-
 
 void cosseno(int numThreads)
 {
@@ -47,7 +51,13 @@ void cosseno(int numThreads)
 void *calculaTermo(void *i)
 {
   int num = *((int *) i);
-  printf("%d\n", num);
+  int rodada = 0, iteracao;
+  while(1)
+  {
+    iteracao = rodada*numThreads + num;
+    printf("%d\n", iteracao);
 
+  }
   return NULL;
 }
+
