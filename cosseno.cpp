@@ -6,14 +6,15 @@
 #include <semaphore.h>
 #include <unistd.h>
 #include <gmpxx.h>
+#include <vector>
 
 using namespace std;
-
 
 void cosseno(int numThreads);
 void *calculaTermo(void*);
 
-pthread_t *threads;
+vector<pthread_t> threads;
+
 unsigned int numCores = 0;
 
 int main (int argc, char *argv[])
@@ -27,10 +28,11 @@ int main (int argc, char *argv[])
 void cosseno(int numThreads)
 {
   int i;
-  int *thread_args;
+  vector<int> thread_args;
 
-  threads = (pthread_t*)malloc(numThreads*sizeof(pthread_t));
-  thread_args = (int*)malloc(numThreads*sizeof(int));
+  threads.resize(numThreads);
+  thread_args.resize(numThreads);
+  
 
   for(i=0; i<numThreads; i++) thread_args[i] = i;
 
