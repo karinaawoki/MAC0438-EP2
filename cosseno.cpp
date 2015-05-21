@@ -32,6 +32,14 @@ int main (int argc, char *argv[])
   numCores = std::thread::hardware_concurrency();
   printf("numCores = %d\n",numCores);
 
+  mpf_set_default_prec(1000000);
+
+  mpf_t resp,base;
+  mpf_init(resp);
+  mpf_init_set_si(base,40320);
+  mpf_pow_ui(resp,base,40320);
+  cout << resp << endl;
+  
   numThreads = 10;
   return 0;
 }
