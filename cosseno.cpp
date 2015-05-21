@@ -37,9 +37,9 @@ char opcao;
 
 int parar;
 
-int main (int argc, char *argv[])
-{
-  numCores = std::thread::hardware_concurrency();
+int main (int argc, char *argv[]){
+  numCores = thread::hardware_concurrency();
+
   printf("numCores = %d\n",numCores);
 
   mpf_set_default_prec(1000000);
@@ -56,8 +56,7 @@ int main (int argc, char *argv[])
   return 0;
 }
 
-void cosseno(int numThreads)
-{
+void cosseno(int numThreads){
   int i;
   vector<int> thread_args;
 
@@ -78,13 +77,17 @@ void cosseno(int numThreads)
 }
 
 
-void *calculaTermo(void *i)
-{
+void *calculaTermo(void *i){
   int num = *((int *) i);
   int rodada = 0, n;
 
+<<<<<<< HEAD
   while(!parar)
   {
+=======
+  while(1){
+    
+>>>>>>> 0098906662724f50ddad30d8afdf8a2d42a2e323
     n = rodada*numThreads + num;
 
 
@@ -104,9 +107,36 @@ void *calculaTermo(void *i)
     if(num == numThreads-2) valorPenultimaThread = termo[num];
     else if (num == numThreads-1) valorUltimaThread = termo[num];
 
+<<<<<<< HEAD
     sem_wait(&mutexSoma);
       somaTermos += termo[num];
     sem_post(&mutexSoma);
+=======
+    sem_wait(mutexSoma);
+    somaTermos += termo[num];
+    sem_post(mutexSoma);
+  
+    sem_wait(&mutexQuantosPassaram);
+      quantosPassaram++;
+ 
+      if(quantosPassaram == numThreads)
+      {
+        /* condição de parada: */
+        if(opcao == 'f' && valorUltimaThread-valorUltimaThread < parada)
+        {
+          sem_wait(parar);
+        }
+        if(opcao == 'm' && valorUltimaThread < parada)
+        {
+          sem_wait(parar);
+        }
+
+        quantosPassaram = 0;
+      }
+    sem_post(&mutexQuantosPassaram);
+    /* pthread_barrier_wait(&barreira); */
+
+>>>>>>> 0098906662724f50ddad30d8afdf8a2d42a2e323
   }
   return NULL;
 }
@@ -119,6 +149,7 @@ int modulo(int i)
     return i;
   return -1*i;
 }
+<<<<<<< HEAD
 
 
 int diferencaMenorQueM(int thread1)
@@ -145,3 +176,5 @@ int diferencaMenorQueM(int thread1)
   }
   return 0;
 }
+=======
+>>>>>>> 0098906662724f50ddad30d8afdf8a2d42a2e323
