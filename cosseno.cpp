@@ -12,13 +12,15 @@ void *calculaTermo();
 
 pthread_t *threads;
 
+int numThreads;
+int parar;
+
 int main (int argc, char *argv[])
 {
-  /*int f = 1;
-    int numThreads = 10;*/
+  /*int f = 1; */
+  numThreads = 10;
   return 0;
 }
-
 
 void cosseno(int numThreads)
 {
@@ -41,7 +43,13 @@ void cosseno(int numThreads)
 void *calculaTermo(void *i)
 {
   int num = *((int *) i);
-  printf("%d\n", num);
+  int rodada = 0, iteracao;
+  while(1)
+  {
+    iteracao = rodada*numThreads + num;
+    printf("%d\n", iteracao);
 
+  }
   return NULL;
 }
+
