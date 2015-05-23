@@ -33,12 +33,12 @@ unsigned int numCores = 0;
 vector<float> termo;
 
 int numThreads;
-int parouThread;
-float somaTermos;
-float x; /*GMP*/
+/*int parouThread;*/
+float somaTermos;/*GMP*/
+float x;    /*GMP*/
 float parada; /*GMP*/
 char opcao;
-float ultimo;
+float ultimo; /*GMP*/
 char impressao;
 
 int parar;
