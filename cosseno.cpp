@@ -1,9 +1,11 @@
 #define SHARED 1
+#define DEBUG 0
 #define _XOPEN_SOURCE 600
 
 #include <cstdio>
 #include <iostream>
 #include <cstdlib>
+#include <cstring>
 #include <pthread.h>
 #include <thread>
 #include <semaphore.h>
@@ -11,7 +13,6 @@
 #include <gmpxx.h>
 #include <vector>
 #include "mathFunctions.hpp"
-
 
 using namespace std;
 
@@ -29,18 +30,14 @@ sem_t mutexSoma;
 unsigned int numCores = 0;
 
 int numThreads;
-f parada,x,somaTermos,valorUltimaThread,valorPenultimaThread;
+f parada,x,somaTermos,valorUltimaThread,valorPenultimaThread,ultimo;
 int quantosPassaram;
 vector<f> termo;
 char opcao;
-float ultimo;
-
-int parar;
+char impressao;
 
 int main (int argc, char *argv[]){
   numCores = thread::hardware_concurrency();
-
-  printf("numCores = %d\n",numCores);
 
   mpf_set_default_prec(1000000);
   /* Define precisão */
@@ -50,6 +47,28 @@ int main (int argc, char *argv[]){
   opcao = 'f';
   parada = 0.13;
   /*--------*/
+  
+  if(DEBUG) printf("numCores = %d\n",numCores);
+  
+  numThreads = atoi(argv[1]);
+  if(numThreads == 0) numThreads = numCores;
+
+  opcao = argv[2][0];
+  parada = potenciaErro(atoi(argv[3]));
+  x = atof(argv[4]);
+
+  if(argc >= 6)
+    impressao = argv[5][0];
+  else
+    impressao = 'n';
+
+  if (DEBUG){
+    printf("numThreads %d\n", numThreads);
+    printf("opcao %c\n", opcao);
+    printf("parada %f\n", parada);
+    printf("x %f\n", x);
+    printf("%c\n", impressao);
+  }
 
   cosseno();
   return 0;
@@ -89,7 +108,7 @@ void cosseno(){
 
   for (i = 0; i < numThreads; i++) pthread_join(threads[i], NULL);
 
-  printf("\n\n %f\n", somaTermos);
+  printf("cos(%f) = %f\n", x, somaTermos);
 }
 
 
@@ -113,22 +132,17 @@ void *calculaTermo(void *i)
 
     termo[num] = menosUmElevadoAnINT(n)*potenciaINT(x, 2*n)*1.0 /fatorialINT(2*n);
 
+    /* BARREIRA AUXILIAR */
     pthread_barrier_wait(&barreira2);
+
     if(opcao == 'f' && num == 0 && modulo(ultimo - termo[num]) < parada)
-    {
       parar = 1;
-    }
     else if (opcao == 'f' && num!=0 && modulo(termo[num-1] -termo[num])<parada)
-    {
       parar = 1;
-    }
 
     if(opcao == 'm' && modulo(termo[num])< parada)
-    {
       parar = 1;
-    }
 
-    pthread_barrier_wait(&barreira);
 
     if(num == numThreads-1)
       ultimo = termo[num];
@@ -149,9 +163,28 @@ void *calculaTermo(void *i)
       }
     sem_post(&mutexQuantosPassaram);
     /* pthread_barrier_wait(&barreira); */
+    /*>>>*/somaTermos += termo[num];
+    /*>>>*/if(impressao == 's') printf("Valor parcial de cos(x) - a cada termo: %f\n", somaTermos);
+    sem_post(&mutexSoma);
+
+    
+
+    if(impressao == 'd')
+      printf("Thread %d chegou na barreira! \n", num);
+    /* BARREIRA */
+    pthread_barrier_wait(&barreira);
+    
+    if(impressao=='d' && num == 0)
+      printf("Valor parcial do cos(x): %f\n\n", somaTermos);
+
     rodada++;
 
   }
+  if(impressao!='s' && num == 0)
+    printf("\nNúmero de rodadas: %d\n", rodada);
+  else if(impressao == 's' && num==0)
+    printf("\nNúmero de termos calculados: %d\n", rodada*numThreads);
+
   return NULL;
 }
 
