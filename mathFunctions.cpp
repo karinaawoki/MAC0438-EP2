@@ -1,5 +1,5 @@
-/*#include"mathFunctions.hpp"
-
+#include"mathFunctions.hpp"
+/*
 mpz_class fatorial( mpz_class num){
   mpz_class fatorial = 1;
   while(num!=1){
@@ -44,5 +44,20 @@ float potenciaINT(float base, int pot)
     pot--;
   }
 
+  return resultado;
+}
+
+
+float potenciaErro(int k)
+{
+  /* A diferença tem que ser 10 elevado a - k */
+  float resultado, valor = 1;
+  int i;
+
+  for(i = 0; i<k; i++)
+  {
+    valor = valor*10;
+  }
+  resultado = 1.0/valor;
   return resultado;
 }

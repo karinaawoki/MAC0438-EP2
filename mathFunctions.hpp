@@ -7,3 +7,4 @@ int menosUmElevadoAn(int n);
 int fatorialINT(int i);
 int menosUmElevadoAnINT(int i);
 float potenciaINT(float base, int pot);
+float potenciaErro(int k);
