@@ -1,4 +1,4 @@
-#include"mathFunctions.hpp"
+/*#include"mathFunctions.hpp"
 
 mpz_class fatorial( mpz_class num){
   mpz_class fatorial = 1;
@@ -14,7 +14,7 @@ int menosUmElevadoAn(int n){
   if(n%2 == 0) return 1;
   return -1;
 }
-
+*/
 
 
 int fatorialINT(int i)
@@ -35,9 +35,9 @@ int menosUmElevadoAnINT(int i)
 }
 
 
-int potenciaINT(int base, int pot)
+float potenciaINT(float base, int pot)
 {
-  int resultado = 1;
+  float resultado = 1;
   while(pot>0)
   {
     resultado *=base;
