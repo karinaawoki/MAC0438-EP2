@@ -111,7 +111,7 @@ void *calculaTermo(void *i)
     sem_wait(&parar);
     sem_post(&parar);
 
-	  //termo[num] = menosUmElevadoAnINT(n)*potenciaINT(x, 2*n)*1.0 /fatorialINT(2*n);
+    termo[num] = menosUmElevadoAnINT(n)*potenciaINT(x, 2*n)*1.0 /fatorialINT(2*n);
 
     pthread_barrier_wait(&barreira2);
     if(opcao == 'f' && num == 0 && modulo(ultimo - termo[num]) < parada)
