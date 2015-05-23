@@ -22,6 +22,7 @@ int diferencaMenorQueM(int thread1);
 
 vector<pthread_t> threads;
 pthread_barrier_t barreira; 
+pthread_barrier_t barreira2; 
 
 sem_t mutexSoma;
 
@@ -32,6 +33,7 @@ f parada,x,somaTermos,valorUltimaThread,valorPenultimaThread;
 int quantosPassaram;
 vector<f> termo;
 char opcao;
+float ultimo;
 
 int parar;
 
@@ -42,23 +44,11 @@ int main (int argc, char *argv[]){
 
   mpf_set_default_prec(1000000);
   /* Define precisão */
-
-  //mpf_init(somaTermos);
-  //mpf_init(valorUltimaThread);
-  //mpf_init(valorPenultimaThread);
   
-
-  mpf_t resp,base;
-  mpf_init(resp);
-  mpf_init_set_si(base,40320);
-  mpf_pow_ui(resp,base,40320);
-  cout << resp << endl;
-
-  /*---------*/
-  x = 5;  
+  x = 1.3;
   numThreads = 3;
-  opcao = 'm';
-  parada = 0.001;
+  opcao = 'f';
+  parada = 0.13;
   /*--------*/
 
   cosseno();
@@ -75,6 +65,7 @@ void cosseno(){
   termo.clear();
   thread_args.clear();
   parar = 0;
+  ultimo = 10;
   threads.resize(numThreads);
   termo.resize(numThreads);
   thread_args.resize(numThreads);
@@ -82,6 +73,7 @@ void cosseno(){
   quantosPassaram = 0;
   
   pthread_barrier_init(&barreira,NULL,numThreads);
+  pthread_barrier_init(&barreira2,NULL,numThreads);
   
   sem_init(&mutexSoma , SHARED, 1);
 
@@ -112,7 +104,6 @@ void *calculaTermo(void *i)
 
   while(!parar)
   {
-    printf("%d\n", num);
     n = rodada*numThreads + num;
     
     mpf_pow_ui(resp.get_mpf_t(),x.get_mpf_t(),2*n);
@@ -120,19 +111,27 @@ void *calculaTermo(void *i)
     sem_wait(&parar);
     sem_post(&parar);
 
-    termo[num] = menosUmElevadoAnINT(n)*potenciaINT(x, 2*n)*1.0 /fatorialINT(2*n);
-    printf("n:%d  x:%d  -1:%d   poten:%d    fato:%d\n",n, x, menosUmElevadoAnINT(n), potenciaINT(x, 2*n), fatorialINT(2*n) );
-    printf("%f\n\n\n", termo[num]);
+	  //termo[num] = menosUmElevadoAnINT(n)*potenciaINT(x, 2*n)*1.0 /fatorialINT(2*n);
 
-    if(opcao == 'f' && diferencaMenorQueM(num))
+    pthread_barrier_wait(&barreira2);
+    if(opcao == 'f' && num == 0 && modulo(ultimo - termo[num]) < parada)
     {
       parar = 1;
     }
+    else if (opcao == 'f' && num!=0 && modulo(termo[num-1] -termo[num])<parada)
+    {
+      parar = 1;
+    }
+
     if(opcao == 'm' && modulo(termo[num])< parada)
     {
-      printf("CAIUUUU %f\n   %f - %f", termo[num], modulo(termo[num]), parada);
       parar = 1;
     }
+
+    pthread_barrier_wait(&barreira);
+
+    if(num == numThreads-1)
+      ultimo = termo[num];
 
     sem_wait(&mutexSoma);
     /*>>>*/somaTermos += termo[num];
@@ -163,29 +162,4 @@ float modulo(float i)
   if (i>=0)
     return i;
   return -1*i;
-}
-
-int diferencaMenorQueM(int thread1)
-{
-  int thread2 = thread1+1;
-  int thread3 = thread1-1;
-  /* Sabe-se que termos consecutivos tem sinais diferentes */
-  if (thread2<numThreads && 
-        ((termo[thread1]>0 && termo[thread2]<0) || 
-         (termo[thread1]<0 && termo[thread2]>0))
-     )
-  {
-    if(modulo(termo[thread1] - termo[thread2])<parada)
-      return 1;
-  }
-
-  if (thread3>=0 && 
-        ((termo[thread1]>0 && termo[thread3]<0) || 
-         (termo[thread1]<0 && termo[thread3]>0) )
-     )
-  {
-    if(modulo(termo[thread1] - termo[thread3])<parada)
-      return 1;
-  }
-  return 0;
 }
