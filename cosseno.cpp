@@ -12,23 +12,28 @@
 #include <vector>
 #include "mathFunctions.hpp"
 
+
 using namespace std;
 
-void cosseno(int numThreads);
+void cosseno();
 void *calculaTermo(void*);
+float modulo(float i);
+int diferencaMenorQueM(int thread1);
 
 vector<pthread_t> threads;
 pthread_barrier_t barreira; 
 
-sem_t mutexSoma, mutexQuantosPassaram, parar;
+sem_t mutexSoma;
 
 unsigned int numCores = 0;
 
 int numThreads;
-f x,somaTermos,valorUltimaThread,valorPenultimaThread;
+f parada,x,somaTermos,valorUltimaThread,valorPenultimaThread;
 int quantosPassaram;
 vector<f> termo;
 char opcao;
+
+int parar;
 
 int main (int argc, char *argv[]){
   numCores = thread::hardware_concurrency();
@@ -36,6 +41,7 @@ int main (int argc, char *argv[]){
   printf("numCores = %d\n",numCores);
 
   mpf_set_default_prec(1000000);
+  /* Define precisão */
 
   //mpf_init(somaTermos);
   //mpf_init(valorUltimaThread);
@@ -47,52 +53,66 @@ int main (int argc, char *argv[]){
   mpf_init_set_si(base,40320);
   mpf_pow_ui(resp,base,40320);
   cout << resp << endl;
-  
-  numThreads = 10;
+
+  /*---------*/
+  x = 5;  
+  numThreads = 3;
+  opcao = 'm';
+  parada = 0.001;
+  /*--------*/
+
+  cosseno();
   return 0;
 }
 
-void cosseno(int numThreads){
+
+
+void cosseno(){
   int i;
   vector<int> thread_args;
-
   
   threads.clear();
   termo.clear();
   thread_args.clear();
+  parar = 0;
   threads.resize(numThreads);
   termo.resize(numThreads);
   thread_args.resize(numThreads);
-
-  //for(int i = 0; i < numThreads; i++) mpf_init(termo[i]);
 
   quantosPassaram = 0;
   
   pthread_barrier_init(&barreira,NULL,numThreads);
   
-  sem_init(&parar , SHARED, 1);
   sem_init(&mutexSoma , SHARED, 1);
-  sem_init(&mutexQuantosPassaram, SHARED, 1);
 
-  for(i=0; i<numThreads; i++) thread_args[i] = i;
-
+  for(i=0; i<numThreads; i++) 
+  {
+    thread_args[i] = i;
+    termo[i] = 5;
+  }
+  
   for(i = 0; i < numThreads; i++)
     if(pthread_create(&threads[i], NULL, calculaTermo,(void*)&thread_args[i]))
       abort();
-  
+
   for (i = 0; i < numThreads; i++) pthread_join(threads[i], NULL);
+
+  printf("\n\n %f\n", somaTermos);
 }
 
 
-void *calculaTermo(void *i){
+
+void *calculaTermo(void *i)
+{
   int num = *((int *) i);
   int rodada = 0;
   int n = 0;
   //mpf_class termo = 0;
   f resp = 0;
 
-  while(1){
-    
+  while(!parar)
+  {
+    printf("%d\n", num);
     n = rodada*numThreads + num;
     
     mpf_pow_ui(resp.get_mpf_t(),x.get_mpf_t(),2*n);
@@ -100,13 +120,19 @@ void *calculaTermo(void *i){
     sem_wait(&parar);
     sem_post(&parar);
 
-    if(opcao == 'f' && valorUltimaThread-valorUltimaThread < parada) sem_wait(parar);
-    if(opcao == 'm' && valorUltimaThread < parada) sem_wait(parar);
+    termo[num] = menosUmElevadoAnINT(n)*potenciaINT(x, 2*n)*1.0 /fatorialINT(2*n);
+    printf("n:%d  x:%d  -1:%d   poten:%d    fato:%d\n",n, x, menosUmElevadoAnINT(n), potenciaINT(x, 2*n), fatorialINT(2*n) );
+    printf("%f\n\n\n", termo[num]);
 
-    pthread_barrier_wait(&barreira);
-
-    if(num == numThreads-2) valorPenultimaThread = termo[num];
-    else if (num == numThreads-1) valorUltimaThread = termo[num];
+    if(opcao == 'f' && diferencaMenorQueM(num))
+    {
+      parar = 1;
+    }
+    if(opcao == 'm' && modulo(termo[num])< parada)
+    {
+      printf("CAIUUUU %f\n   %f - %f", termo[num], modulo(termo[num]), parada);
+      parar = 1;
+    }
 
     sem_wait(&mutexSoma);
     /*>>>*/somaTermos += termo[num];
@@ -124,6 +150,7 @@ void *calculaTermo(void *i){
       }
     sem_post(&mutexQuantosPassaram);
     /* pthread_barrier_wait(&barreira); */
+    rodada++;
 
   }
   return NULL;
@@ -131,7 +158,34 @@ void *calculaTermo(void *i){
 
 
 
-int modulo(int i){
-  if(i>=0) return i;
+float modulo(float i)
+{
+  if (i>=0)
+    return i;
   return -1*i;
+}
+
+int diferencaMenorQueM(int thread1)
+{
+  int thread2 = thread1+1;
+  int thread3 = thread1-1;
+  /* Sabe-se que termos consecutivos tem sinais diferentes */
+  if (thread2<numThreads && 
+        ((termo[thread1]>0 && termo[thread2]<0) || 
+         (termo[thread1]<0 && termo[thread2]>0))
+     )
+  {
+    if(modulo(termo[thread1] - termo[thread2])<parada)
+      return 1;
+  }
+
+  if (thread3>=0 && 
+        ((termo[thread1]>0 && termo[thread3]<0) || 
+         (termo[thread1]<0 && termo[thread3]>0) )
+     )
+  {
+    if(modulo(termo[thread1] - termo[thread3])<parada)
+      return 1;
+  }
+  return 0;
 }
