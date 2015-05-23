@@ -1,4 +1,7 @@
 #include <gmpxx.h>
 
-mpz_class fatorial(mpz_class num);
+using f = mpf_class;
+using z = mpz_class;
+
+z fatorial(z num);
 int menosUmElevadoAn(int n);

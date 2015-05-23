@@ -1,13 +1,22 @@
 #include"mathFunctions.hpp"
 
-mpz_class fatorial( mpz_class num){
-  mpz_class fatorial = 1;
+z fatorial(z num){
+  /*
+  mpf_t fatorial;
+  mpf_init_set_si(fatorial,1);
+  
   while(num!=1){
-    fatorial = fatorial * num;
+    mpf_set_si(fatorial,fatorial*num);
     num = num -1;
   }
 
-  return fatorial;
+  mpf_set(res,fatorial);
+  */
+  z fat = 1;
+  while(num!=1){
+    fat = fat * num--;
+  }
+  return fat;
 }
 
 int menosUmElevadoAn(int n){
