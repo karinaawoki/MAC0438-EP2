@@ -14,8 +14,6 @@ int menosUmElevadoAn(int n){
 }
 
 
-
-
 float potenciaErro(int k)
 {
   /* A diferença tem que ser 10 elevado a - k */
@@ -28,4 +26,9 @@ float potenciaErro(int k)
   }
   resultado = 1.0/valor;
   return resultado;
+}
+
+f modulo(f i){
+  if(i>=0) return i;
+  return -1*i;
 }
