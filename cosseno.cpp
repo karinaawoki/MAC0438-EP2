@@ -68,7 +68,7 @@ int main (int argc, char *argv[]){
     printf("%c\n", impressao);
   }
 
-  somaTermos = 0; /* AQUI */
+  somaTermos = 0.0;
 
   cosseno();
   return 0;
@@ -157,21 +157,26 @@ void *calculaTermo(void *i){
 
 void sequencial() /* AQUI */
 {
-  float termo1;
-  float ultimoTermo = 10;
+  f termo1, resp = 0.0;
+  f ultimoTermo = 10.0;
   int n = 0;
+
   while(1)
   {
-    termo1 = menosUmElevadoAnINT(n)*potenciaINT(x, 2*n)*1.0 /fatorialINT(2*n);
+
+    mpf_pow_ui(resp.get_mpf_t(),x.get_mpf_t(),2*n);
+    termo1 = (menosUmElevadoAn(n)*resp)/fatorial(2*n);
+
+
     somaTermos+=termo1;
-    printf("Valor parcial de cos(x): %f\n", somaTermos);
+    n++;
+    cout << "Valor parcial do cos(x): " << somaTermos << endl;
     if(opcao == 'm' && modulo(termo1) < parada)N
       break;
     else if(opcao == 'f' && modulo(ultimoTermo - termo1)<parada)
       break;
 
     ultimoTermo = termo1;
-    n++;
   }
 
   printf("Número de termos: %d\n", n);
