@@ -22,6 +22,7 @@ using namespace std;
 
 void cosseno();
 void *calculaTermo(void*);
+void sequencial();
 
 vector<pthread_t> threads;
 pthread_barrier_t barreira,barreira2; 
@@ -67,6 +68,8 @@ int main (int argc, char *argv[]){
     printf("%c\n", impressao);
   }
 
+  somaTermos = 0; /* AQUI */
+
   cosseno();
   return 0;
 }
@@ -94,12 +97,16 @@ void cosseno(){
     thread_args[i] = i;
     termo[i] = 5;
   }
-  
-  for(int i = 0; i < numThreads; i++)
-    if(pthread_create(&threads[i], NULL, calculaTermo,(void*)&thread_args[i]))
-      abort();
-  
-  for(int i = 0; i < numThreads; i++) pthread_join(threads[i], NULL);
+  if(impressao == 's')
+    sequencial();  
+  else
+  {
+    for(int i = 0; i < numThreads; i++)
+      if(pthread_create(&threads[i], NULL, calculaTermo,(void*)&thread_args[i]))
+        abort();
+    
+    for(int i = 0; i < numThreads; i++) pthread_join(threads[i], NULL);
+  }
 
   //cout << "cos(" << x << ") = " << somaTermos << endl;
   cout << "cos(" << x <<") = ";  
@@ -132,7 +139,6 @@ void *calculaTermo(void *i){
 
     sem_wait(&mutexSoma);
     /*>>>*/somaTermos = somaTermos + termo[num];
-    /*>>>*/if(impressao == 's') cout << "Valor parcial de cos(" << x << ") - a cada termo: " << somaTermos << endl;
     sem_post(&mutexSoma);
     
 
@@ -145,10 +151,30 @@ void *calculaTermo(void *i){
     rodada++;
 
   }
-  if(impressao!='s' && num == 0) printf("\nNúmero de rodadas: %d\n", rodada);
-  else if(impressao == 's' && num==0) printf("\nNúmero de termos calculados: %d\n", rodada*numThreads);
-  
   return NULL;
+}
+
+
+void sequencial() /* AQUI */
+{
+  float termo1;
+  float ultimoTermo = 10;
+  int n = 0;
+  while(1)
+  {
+    termo1 = menosUmElevadoAnINT(n)*potenciaINT(x, 2*n)*1.0 /fatorialINT(2*n);
+    somaTermos+=termo1;
+    printf("Valor parcial de cos(x): %f\n", somaTermos);
+    if(opcao == 'm' && modulo(termo1) < parada)N
+      break;
+    else if(opcao == 'f' && modulo(ultimoTermo - termo1)<parada)
+      break;
+
+    ultimoTermo = termo1;
+    n++;
+  }
+
+  printf("Número de termos: %d\n", n);
 }
 
 
