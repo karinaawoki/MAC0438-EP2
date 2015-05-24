@@ -1,9 +1,12 @@
 #include <gmpxx.h>
+#include <cstdio>
+#include <iostream>
+using namespace std;
 
 using f = mpf_class;
 using z = mpz_class;
 
 z fatorial(z);
 int menosUmElevadoAn(int);
-float potenciaErro(int);   /*GMP*/
+f potenciaErro(int);
 f modulo(f);

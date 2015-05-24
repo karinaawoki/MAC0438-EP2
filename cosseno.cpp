@@ -6,12 +6,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <thread>
 
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
+#include <gmp.h>
 #include <gmpxx.h>
 
 #include "mathFunctions.hpp"
@@ -22,9 +24,7 @@ void cosseno();
 void *calculaTermo(void*);
 
 vector<pthread_t> threads;
-pthread_barrier_t barreira; 
-pthread_barrier_t barreira2; 
-
+pthread_barrier_t barreira,barreira2; 
 sem_t mutexSoma;
 
 unsigned int numCores = 0;
@@ -37,7 +37,7 @@ vector<f> termo;
 int main (int argc, char *argv[]){
   numCores = thread::hardware_concurrency();
 
-  mpf_set_default_prec(1000000);
+  mpf_set_default_prec(100000);
   /* Define precisão */
   
   x = 1.3;
@@ -74,7 +74,6 @@ int main (int argc, char *argv[]){
 
 
 void cosseno(){
-  int i;
   vector<int> thread_args;
   
   threads.clear();
@@ -91,33 +90,34 @@ void cosseno(){
   
   sem_init(&mutexSoma , SHARED, 1);
 
-  for(i=0; i<numThreads; i++) {
+  for(int i = 0; i < numThreads; i++){
     thread_args[i] = i;
     termo[i] = 5;
   }
   
-  for(i = 0; i < numThreads; i++)
+  for(int i = 0; i < numThreads; i++)
     if(pthread_create(&threads[i], NULL, calculaTermo,(void*)&thread_args[i]))
       abort();
+  
+  for(int i = 0; i < numThreads; i++) pthread_join(threads[i], NULL);
 
-  for (i = 0; i < numThreads; i++) pthread_join(threads[i], NULL);
-
-  cout << "cos(" << x << ") = " << somaTermos << endl;
+  //cout << "cos(" << x << ") = " << somaTermos << endl;
+  cout << "cos(" << x <<") = ";  
+  gmp_printf("%.*Ff\n",100000,somaTermos.get_mpf_t());
 }
 
 
-
-void *calculaTermo(void *i)
-{
+void *calculaTermo(void *i){
   int num = *((int *) i);
   int rodada = 0;
   int n = 0;
-  f resp = 0;
+  f resp = 0.0;
 
   while(!parar){
     n = rodada*numThreads + num;
     
     mpf_pow_ui(resp.get_mpf_t(),x.get_mpf_t(),2*n);
+    cout << resp << endl;
     termo[num] = (menosUmElevadoAn(n)*resp)/fatorial(2*n);
 
     /* BARREIRA AUXILIAR */
@@ -147,7 +147,7 @@ void *calculaTermo(void *i)
   }
   if(impressao!='s' && num == 0) printf("\nNúmero de rodadas: %d\n", rodada);
   else if(impressao == 's' && num==0) printf("\nNúmero de termos calculados: %d\n", rodada*numThreads);
-
+  
   return NULL;
 }
 

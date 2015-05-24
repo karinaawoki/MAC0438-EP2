@@ -2,8 +2,10 @@
 
 z fatorial(z num){
   z fat = 1;
-  while(num!=1){
-    fat = fat * num--;
+  
+  while(num>1){
+    fat = fat * num;
+    num = num -1;
   }
   return fat;
 }
@@ -14,16 +16,14 @@ int menosUmElevadoAn(int n){
 }
 
 
-float potenciaErro(int k)
-{
+f potenciaErro(int k){
   /* A diferença tem que ser 10 elevado a - k */
-  float resultado, valor = 1;
+  f resultado,valor;
+  valor = 1.0;
   int i;
 
-  for(i = 0; i<k; i++)
-  {
-    valor = valor*10;
-  }
+  for(i = 0; i<k; i++) valor = valor*10;
+  
   resultado = 1.0/valor;
   return resultado;
 }
