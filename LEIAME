@@ -1,0 +1,47 @@
+Nomes: Karina Suemi Awoki       nºUSP: 7572102
+       Mateus Barros Rodrigues         7991037
+       
+
+
+COMPILANDO:
+Para compilar o programa, basta digitar no 
+terminal o comando:
+$ make
+
+EXECUTANDO:
+Para executar o programa, digite no terminal
+o comando:
+$ ./ep [entrada que vc deseja]
+Por exemplo:
+$ ./ep 5 f 7 1.3 s
+
+
+
+
+
+BARREIRA DE SINCRONIZAÇÃO:
+
+ A barreira de sincronização que foi utilizada,
+foi a barreira da biblioteca "pthread.h".
+ Foram utilizados os seguintes comandos para 
+manusea-la:
+  * pthread_barrier_t : Cria uma barreira.
+  * pthread_barrier_init: Inicializa a barreira 
+     passada por parâmetro com o número n de
+     processos que ela deve esperar (também
+     passado por parâmetro).
+  * pthread_barrier_wait: faz com que um
+     processo espere na barreira até que todos
+     os n processos cheguem nessa barreira.
+
+
+Essas são barreiras do tipo reutilizáveis. E do 
+modo como foi utilizada nesse ep, ela funciona 
+como uma barreira dupla, já que foram colocadas 
+duas barreiras para garantir que na hora em que a
+constante de parada seja modificada, não haja
+nenhum processo que tenha dado a volta no while e
+esteja preso na barreira quando todos os outros 
+processos terminarem. 
+  
+
