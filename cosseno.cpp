@@ -1,5 +1,5 @@
 #define SHARED 1
-#define DEBUG 1
+#define DEBUG 0
 #define _XOPEN_SOURCE 600
 
 #include <cstdio>
@@ -38,15 +38,11 @@ vector<f> termo;
 int main (int argc, char *argv[]){
   numCores = thread::hardware_concurrency();
 
-  mpf_set_default_prec(100000);
   /* Define precisão */
+  mpf_set_default_prec(100000);
   
-  x = 1.3;
-  numThreads = 3;
-  opcao = 'f';
-  parada = 0.13;
-  /*--------*/
-  
+
+  /* Pegando valores da entrada! */
   if(DEBUG) printf("numCores = %d\n",numCores);
   
   numThreads = atoi(argv[1]);
@@ -58,6 +54,8 @@ int main (int argc, char *argv[]){
 
   if(argc >= 6) impressao = argv[5][0];
   else impressao = 'n';
+
+
 
 
   if(DEBUG){
@@ -123,6 +121,7 @@ void *calculaTermo(void *i){
   while(!parar){
     n = rodada*numThreads + num;
     
+    /* Calcula o valor do termo */
     mpf_pow_ui(resp.get_mpf_t(),x.get_mpf_t(),2*n);
     cout << resp << endl;
     termo[num] = (menosUmElevadoAn(n)*resp)/fatorial(2*n);
@@ -130,11 +129,14 @@ void *calculaTermo(void *i){
     /* BARREIRA AUXILIAR */
     pthread_barrier_wait(&barreira2);
 
+    /* Verifica condição de parada */
     if(opcao == 'f' && num == 0 && modulo(ultimo - termo[num]) < parada) parar = 1;
     else if (opcao == 'f' && num!=0 && modulo(termo[num-1] -termo[num])<parada) parar = 1;
 
     if(opcao == 'm' && modulo(termo[num])< parada) parar = 1;
 
+
+    /* Atualiza o elemento da última thread */
     if(num == numThreads-1) ultimo = termo[num];
 
     sem_wait(&mutexSoma);
@@ -143,13 +145,13 @@ void *calculaTermo(void *i){
     
 
     if(impressao == 'd') printf("Thread %d chegou na barreira! \n", num);
+
+
     /* BARREIRA */
     pthread_barrier_wait(&barreira);
     
     if(impressao=='d' && num == 0) cout << "Valor parcial do cos(" << x << "): " << somaTermos << endl;
-
     rodada++;
-
   }
   return NULL;
 }
@@ -164,13 +166,16 @@ void sequencial() /* AQUI */
   while(1)
   {
 
+    /* Calcula o valor do termo */
     mpf_pow_ui(resp.get_mpf_t(),x.get_mpf_t(),2*n);
     termo1 = (menosUmElevadoAn(n)*resp)/fatorial(2*n);
 
-
     somaTermos+=termo1;
     n++;
+
     cout << "Valor parcial do cos(x): " << somaTermos << endl;
+
+    /* Verifica condição de parada */
     if(opcao == 'm' && modulo(termo1) < parada)N
       break;
     else if(opcao == 'f' && modulo(ultimoTermo - termo1)<parada)
